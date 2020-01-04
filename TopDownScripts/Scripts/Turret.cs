@@ -63,7 +63,7 @@ public class Turret : MonoBehaviour
        Vector2 interception =  SmartAim(); // minus to turretPosition
        float interceptAngle =AngleBetweenTwoVectors(interception - turretPosition);
   //  Debug.Log("Default Target Position: " + targetPosition+ "Intercepted Point: "+ interception);
-    Debug.Log("Default Angle Computation: " + targetAngle+ "Intercepted Angle: "+ interceptAngle);
+ //   Debug.Log("Default Angle Computation: " + targetAngle+ "Intercepted Angle: "+ interceptAngle);
         //  float velocityAngle = AngleBetweenTwoVectors(target.GetComponent<Rigidbody2D>().magnitude);
 
         //   Debug.Log(" Target Angle: " + targetAngle + "\" Advanced Angle:  \""+ distanceFormulaAngle );

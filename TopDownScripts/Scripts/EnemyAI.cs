@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding;
+
+
+//Enemy States
+// when in range stop, Fire enemy
+//      Needs range state
 public class EnemyAI : MonoBehaviour
 {
     // Start is called before the first frame update
@@ -22,8 +27,6 @@ public class EnemyAI : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
 
         InvokeRepeating("UpdatePath",0f,.5f);
-
-
     }
 void UpdatePath()
 {
@@ -55,9 +58,13 @@ void UpdatePath()
         }
 
         Vector2 direction = ((Vector2)path.vectorPath[currentWaypoint] - rb.position).normalized;
+        Vector2 vectorAngle = target.position - this.transform.position;
 
-        Vector2 force =direction * speed * Time.deltaTime;
-        
+        float angleBetweenTarget = Mathf.Rad2Deg * Mathf.Atan2(vectorAngle.y, vectorAngle.x) - 90;
+        this.transform.rotation = Quaternion.Lerp(this.transform.rotation,Quaternion.Euler(0,0,angleBetweenTarget),5f * Time.deltaTime);
+       
+       
+        Vector2 force = direction * speed * Time.deltaTime;
         rb.AddForce(force,ForceMode2D.Impulse);
 
         float distance = Vector2.Distance(rb.position,path.vectorPath[currentWaypoint]);
