@@ -16,8 +16,9 @@ public class Turret : MonoBehaviour
     public float turnSpeed = 5f;
     [Range(-1, 1)]
     public float angleOffset = 0f;
+    [NonSerialized]
     public float projectileForce = 75;
-    public Shooting shooting;
+    public TurretFire shooting;
     public float angleFixer = 90f;
     public Rigidbody2D rb;
     void Start()
@@ -38,16 +39,16 @@ public class Turret : MonoBehaviour
 
     void Aim()
     { // http://wiki.unity3d.com/index.php?title=Calculating_Lead_For_Projectiles&_ga=2.235450625.1677248304.1577098127-707113775.1576845268
-        target = rangeFinder.targets[0];
-        // Debug.Log("Location Turret, Turret Base: " + turretBase.position + " " + this.gameObject.transform.position);
-        //  Debug.Log("Location Target: " + target.gameObject.transform.position);
 
-        // formula for leading turret Aim
-        /*
-        float distance = Vector3.Distance(turretPos, targetPos);//distance in between in meters
-        float travelTime = distance/turretMuzzleVelocity;//time in seconds the shot would need to arrive at the target
-        Vector3 aimPoint = target.position +targetVelocity*travelTime;
-        */
+        if (rangeFinder.targets[0] != null)
+        {
+            target = rangeFinder.targets[0];
+        }
+        else
+        {// Do nothing 
+        }
+
+
 
         Vector2 turretPosition = turretBase.gameObject.transform.position;
         Vector2 targetPosition = target.gameObject.transform.position;
@@ -57,13 +58,13 @@ public class Turret : MonoBehaviour
         Vector2 calculatedPosition = targetPosition - turretPosition;
         Vector2 calculatedPositionWithVelocity = (targetPosition + (target.gameObject.GetComponent<Rigidbody2D>().velocity * angleOffset/* /(angleOffset + shooting.bulletForce*Time.deltaTime )*/)) - turretPosition;
         // use latter if these are same when not moving
-                                                                                                                                              //    Debug.Log("Vectors manual subtaction: "+ calculatedPosition+ " Vectors from Distance()"+ Vector2.Distance(targetPosition,turretPosition));
+        //    Debug.Log("Vectors manual subtaction: "+ calculatedPosition+ " Vectors from Distance()"+ Vector2.Distance(targetPosition,turretPosition));
         float distanceFormulaAngle = AngleBetweenTwoVectors(calculatedPositionWithVelocity);
         float targetAngle = AngleBetweenTwoVectors(calculatedPosition);
-       Vector2 interception =  SmartAim(); // minus to turretPosition
-       float interceptAngle =AngleBetweenTwoVectors(interception - turretPosition);
-  //  Debug.Log("Default Target Position: " + targetPosition+ "Intercepted Point: "+ interception);
- //   Debug.Log("Default Angle Computation: " + targetAngle+ "Intercepted Angle: "+ interceptAngle);
+        Vector2 interception = SmartAim(); // minus to turretPosition
+        float interceptAngle = AngleBetweenTwoVectors(interception - turretPosition);
+        //  Debug.Log("Default Target Position: " + targetPosition+ "Intercepted Point: "+ interception);
+        //   Debug.Log("Default Angle Computation: " + targetAngle+ "Intercepted Angle: "+ interceptAngle);
         //  float velocityAngle = AngleBetweenTwoVectors(target.GetComponent<Rigidbody2D>().magnitude);
 
         //   Debug.Log(" Target Angle: " + targetAngle + "\" Advanced Angle:  \""+ distanceFormulaAngle );
@@ -82,7 +83,7 @@ public class Turret : MonoBehaviour
     {
         return Mathf.Rad2Deg * Mathf.Atan2(vectors.y, vectors.x) - angleFixer; ;
     }
-      private float AngleBetweenTwoVectorsFixed(Vector2 vectors)
+    private float AngleBetweenTwoVectorsFixed(Vector2 vectors)
     {
         return Mathf.Rad2Deg * Mathf.Atan2(vectors.y, vectors.x);
     }
@@ -105,8 +106,14 @@ public class Turret : MonoBehaviour
     // BUGGY  if not at origin (0,0)
     public Vector2 SmartAim()
     {
-        float  projectileSpeed = projectileForce;
-        target = rangeFinder.targets[0];
+        float projectileSpeed = projectileForce;
+               if (rangeFinder.targets[0] != null)
+        {
+            target = rangeFinder.targets[0];
+        }
+        else
+        {// Do nothing 
+        }
 
         //positions
         Vector2 turretPosition = turretBase.transform.position;
@@ -115,10 +122,10 @@ public class Turret : MonoBehaviour
         Vector2 turretVelocity = turretBase.GetComponent<Rigidbody2D>() ? turretBase.GetComponent<Rigidbody2D>().velocity : Vector2.zero;
         Vector2 targetVelocity = target.GetComponent<Rigidbody2D>() ? target.GetComponent<Rigidbody2D>().velocity : Vector2.zero;
 
-        Vector2 interceptPoint = FirstOrderIntercept(turretPosition,turretVelocity,projectileSpeed,targetPosition,targetVelocity);
-       // Debug.Log("Intercept Point:"+interceptPoint);
+        Vector2 interceptPoint = FirstOrderIntercept(turretPosition, turretVelocity, projectileSpeed, targetPosition, targetVelocity);
+        // Debug.Log("Intercept Point:"+interceptPoint);
         return interceptPoint;
-    
+
     }
 
     public Vector2 FirstOrderIntercept(Vector2 shooterPosition, Vector2 shooterVelocity, float shotSpeed, Vector2 targetPosition, Vector2 targetVelocity)
@@ -134,7 +141,7 @@ public class Turret : MonoBehaviour
         float velocitySquared = targetRelativeVelocity.sqrMagnitude;
         if (velocitySquared < 0.001f)
             return 0f;
-        float a = velocitySquared - 100 * 100;// shotSpeed * shotSpeed;
+        float a = velocitySquared - shotSpeed * shotSpeed;
         if (Mathf.Abs(a) < 0.001f)
         {
             float t = -targetRelativePosition.sqrMagnitude / (2f * Vector2.Dot(targetRelativeVelocity, targetRelativePosition));
