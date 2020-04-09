@@ -43,11 +43,21 @@ namespace NavigationMap
             }
         }
 
-        public  void RequestPath(PathRequest request) // this should be static
+        public void RequestPath(PathRequest request) // this should be static
         {
             ThreadStart threadStart = delegate
             {
                 pathFinding.FindPath(request, FinishedProcessingPath);
+            };
+            threadStart.Invoke();
+        }
+
+        public void RequestSimulatePath(PathRequest request) // this should be static
+        {
+            ThreadStart threadStart = delegate
+            {
+                StopAllCoroutines();
+                StartCoroutine(pathFinding.FindPathSimulation(request, FinishedProcessingPath));
             };
             threadStart.Invoke();
         }

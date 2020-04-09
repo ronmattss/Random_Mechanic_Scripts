@@ -60,10 +60,12 @@
      <Compile Include="Assets\Scripts\AStar\PathFinding.cs" />
      <Compile Include="Assets\Scripts\AStar\PathRequestManager.cs" />
      <Compile Include="Assets\Scripts\AStar\Unit.cs" />
+     <Compile Include="Assets\Scripts\Camera\CameraMovement.cs" />
      <Compile Include="Assets\Scripts\DrawLine.cs" />
      <Compile Include="Assets\Scripts\GeneralScripts\AutoName.cs" />
      <Compile Include="Assets\Scripts\Interactions\CameraControl.cs" />
      <Compile Include="Assets\Scripts\Interactions\FindRoom.cs" />
+     <Compile Include="Assets\Scripts\Spawn.cs" />
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro.cginc" />
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile Overlay.shader" />
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Bitmap.shader" />

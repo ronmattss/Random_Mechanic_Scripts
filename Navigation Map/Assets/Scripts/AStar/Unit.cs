@@ -41,8 +41,11 @@ namespace NavigationMap
         void Update()
         {
 
+            if (Input.GetKeyDown(KeyCode.Return))
+            {
+                StartPath();
+            }
 
-            StartPath();
             // SeekerDistanceToClosestStairs(StairDistance(), "Stair");
             //   Debug.Log("Closest Stair" + ));
         }
@@ -51,30 +54,109 @@ namespace NavigationMap
 
         }
 
-        void StartPath()
+        public void StartPath()
         {
 
             // check if target is on the same floor
 
-            if (Input.GetKeyDown(KeyCode.Return))
+            if(pathWays.Count != 0)
             {
-                // aStarHolder[currentAstar].SetActive(false);
-                pathWays.Clear();
-                currentPosition = transform.position;
-                currentElevation = (int)currentPosition.y;
-                targetElevation = (int)target.position.y;
-                localTarget = target.position;
-                pathWays.Add(currentPosition);
-                StartCoroutine(AdjustPathToStairs());
-
-
+                RemovePath();
             }
+
+            CameraMovement.instance.SetActiveFloors();
+            // aStarHolder[currentAstar].SetActive(false);
+            pathWays.Clear();
+
+            currentPosition = transform.position;
+            currentElevation = (int)currentPosition.y;
+            targetElevation = (int)target.position.y;
+            localTarget = target.position;
+            pathWays.Add(currentPosition);
+            StartCoroutine(AdjustPathToStairs());
+
+
+        }
+
+        public void RemovePath()
+        {
+            RemovePathWay();
+            pathWays.Clear();
+        }
+
+        public void Simulate()
+        {
+
+            // check if target is on the same floor
+
+
+            CameraMovement.instance.SetActiveFloors();
+            // aStarHolder[currentAstar].SetActive(false);
+            pathWays.Clear();
+
+            currentPosition = transform.position;
+            currentElevation = (int)currentPosition.y;
+            targetElevation = (int)target.position.y;
+            localTarget = target.position;
+            pathWays.Add(currentPosition);
+            // aStarHolder[currentAstar].GetComponent<PathRequestManager>().RequestSimulatePath(new PathRequest(currentPosition, stairs, OnPathFound));
+            StartCoroutine(Simulation());
+
+
+
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 //    StopCoroutine("UpdatePath");
                 RemovePathWay();
                 pathWays.Clear();
             }
+        }
+        IEnumerator Simulation()
+        {
+            Spawn.instance.ClearNodes();
+            while (currentElevation != targetElevation)
+            {
+                stairs = SeekerDistanceToClosestStairs(currentElevation, "Stair");
+                localTarget = stairs;
+                //  Debug.Log("Started Coroutine from coroutine");
+                StairDistance(currentPosition);
+                aStarHolder[currentAstar].GetComponent<PathRequestManager>().RequestSimulatePath(new PathRequest(currentPosition, stairs, OnPathFound));
+                yield return new WaitForSeconds(0.5f);
+                //  Debug.Log("Returning from coroutine");
+                if (currentPosition.y < targetElevation)
+                {
+                    stairWell = SeekerDistanceToClosestStairs(currentElevation, "StairWell");
+                    pathWays.Add(stairWell);
+                    currentElevation += 3;
+                    stairWell = SeekerDistanceToClosestStairs(currentElevation, "StairWell");
+                    pathWays.Add(stairWell);
+                    currentPosition = stairWell;
+                    Debug.Log("CurrentPosition: " + currentPosition);
+                    stairs = SeekerDistanceToClosestStairs(currentElevation, "Stair");
+                    pathWays.Add(stairs);
+                    currentPosition = stairs;
+                    Debug.Log("CurrentPosition: " + currentPosition);
+
+                }
+                else if (currentPosition.y > target.transform.position.y)
+                {
+                    stairWell = SeekerDistanceToClosestStairs(currentElevation, "StairWell");
+                    pathWays.Add(stairWell);
+                    currentElevation -= 3;
+                    stairWell = SeekerDistanceToClosestStairs(currentElevation, "StairWell");
+                    pathWays.Add(stairWell);
+                    currentPosition = stairWell;
+                    Debug.Log("CurrentPosition: " + currentPosition);
+                    stairs = SeekerDistanceToClosestStairs(currentElevation, "Stair");
+                    pathWays.Add(stairs);
+                    currentPosition = stairs;
+                    Debug.Log("CurrentPosition: " + currentPosition);
+                }
+            }
+            int test = StairDistance(currentPosition);
+            Debug.Log("Elevation:" + test);
+            aStarHolder[currentAstar].GetComponent<PathRequestManager>().RequestSimulatePath(new PathRequest(currentPosition, target.position, OnPathFound));
+            StopCoroutine(AdjustPathToStairs());
         }
 
         IEnumerator AdjustPathToStairs()
@@ -83,11 +165,57 @@ namespace NavigationMap
             {
                 stairs = SeekerDistanceToClosestStairs(currentElevation, "Stair");
                 localTarget = stairs;
-              //  Debug.Log("Started Coroutine from coroutine");
+                //  Debug.Log("Started Coroutine from coroutine");
                 StairDistance(currentPosition);
                 aStarHolder[currentAstar].GetComponent<PathRequestManager>().RequestPath(new PathRequest(currentPosition, stairs, OnPathFound));
                 yield return new WaitForSeconds(0.5f);
-              //  Debug.Log("Returning from coroutine");
+                //  Debug.Log("Returning from coroutine");
+                if (currentPosition.y < targetElevation)
+                {
+                    stairWell = SeekerDistanceToClosestStairs(currentElevation, "StairWell");
+                    pathWays.Add(stairWell);
+                    currentElevation += 3;
+                    stairWell = SeekerDistanceToClosestStairs(currentElevation, "StairWell");
+                    pathWays.Add(stairWell);
+                    currentPosition = stairWell;
+                    Debug.Log("CurrentPosition: " + currentPosition);
+                    stairs = SeekerDistanceToClosestStairs(currentElevation, "Stair");
+                    pathWays.Add(stairs);
+                    currentPosition = stairs;
+                    Debug.Log("CurrentPosition: " + currentPosition);
+
+                }
+                else if (currentPosition.y > target.transform.position.y)
+                {
+                    stairWell = SeekerDistanceToClosestStairs(currentElevation, "StairWell");
+                    pathWays.Add(stairWell);
+                    currentElevation -= 3;
+                    stairWell = SeekerDistanceToClosestStairs(currentElevation, "StairWell");
+                    pathWays.Add(stairWell);
+                    currentPosition = stairWell;
+                    Debug.Log("CurrentPosition: " + currentPosition);
+                    stairs = SeekerDistanceToClosestStairs(currentElevation, "Stair");
+                    pathWays.Add(stairs);
+                    currentPosition = stairs;
+                    Debug.Log("CurrentPosition: " + currentPosition);
+                }
+            }
+            int test = StairDistance(currentPosition);
+            Debug.Log("Elevation:" + test);
+            aStarHolder[currentAstar].GetComponent<PathRequestManager>().RequestPath(new PathRequest(currentPosition, target.position, OnPathFound));
+            StopCoroutine(AdjustPathToStairs());
+        }
+        IEnumerator SimulatePath()
+        {
+            while (currentElevation != targetElevation)
+            {
+                stairs = SeekerDistanceToClosestStairs(currentElevation, "Stair");
+                localTarget = stairs;
+                //  Debug.Log("Started Coroutine from coroutine");
+                StairDistance(currentPosition);
+                aStarHolder[currentAstar].GetComponent<PathRequestManager>().RequestPath(new PathRequest(currentPosition, stairs, OnPathFound));
+                yield return new WaitForSeconds(0.5f);
+                //  Debug.Log("Returning from coroutine");
                 if (currentPosition.y < targetElevation)
                 {
                     stairWell = SeekerDistanceToClosestStairs(currentElevation, "StairWell");
@@ -149,7 +277,7 @@ namespace NavigationMap
         {
             line = GameObject.FindGameObjectWithTag("LineRenderer").GetComponent<LineRenderer>();
             line.positionCount = waypoints.Count;
-         //   Debug.Log("LinerenderLINWTqweqw");
+            //   Debug.Log("LinerenderLINWTqweqw");
             line.SetPositions(waypoints.ToArray());
 
             // get all waypoints?
@@ -231,7 +359,7 @@ namespace NavigationMap
             // initial closest stair
             closestStair = Mathf.Abs(Vector3.Distance(currentPosition, stairs[0].transform.position));
 
-            
+
             GameObject tempStair = stairs[0];
             for (int i = 0; i < stairs.Length; i++)
             {
@@ -244,29 +372,9 @@ namespace NavigationMap
                 //      Debug.Log("Distance closest Stairs: " + closestStair + " " + tempStair.transform.position);
 
             }
-            Debug.Log("Closest Stairs: "+tempStair.name + "Tag: "+tempStair.tag +" Position: " + tempStair.transform.position);
+            Debug.Log("Closest Stairs: " + tempStair.name + "Tag: " + tempStair.tag + " Position: " + tempStair.transform.position);
             stairs = null;
             return tempStair.transform.position;
-            // // s.AddRange(stairs);
-
-            // public List<GameObject> s = new List<GameObject>();
-            // s.AddRange(stairs);
-            // Vector3 closestStairs = Vector3.up;
-            // float closestDistanceSqr = Mathf.Infinity;
-            // Vector3 currentPosition = transform.position;
-            // foreach (GameObject stair in stairs)
-            // {
-            //     Vector3 closeStair = stair.transform.position - currentPosition;
-            //     float dSqrToTarget = closeStair.sqrMagnitude;
-            //     if (dSqrToTarget < closestDistanceSqr)
-            //     {
-            //         closestDistanceSqr = dSqrToTarget;
-            //         closestStairs = stair.transform.position;
-            //     }
-            // }
-            // Debug.Log("Distance closest Stairs: " + closestStairs + " ");
-            // stairs = null;
-            // return closestStairs;
 
         }
 

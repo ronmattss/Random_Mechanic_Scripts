@@ -21,6 +21,9 @@ TagManager:
   - StairWell9
   - StairWell12
   - StairWell15
+  - Seeker
+  - Capsule
+  - VisualNode
   layers:
   - Default
   - TransparentFX

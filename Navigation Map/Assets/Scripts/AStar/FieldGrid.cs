@@ -112,7 +112,19 @@ namespace NavigationMap
 
         public FieldNode GetRandomFieldNodePoint()
         {
-            return grid[Random.Range(0, gridSizeX), Random.Range(0, gridSizeY)];
+            int gridX = Random.Range(0, gridSizeX);
+            int gridY = Random.Range(0, gridSizeY);
+
+            if (grid[gridX, gridY].isPlaceable)
+            {
+                Debug.Log("is Placeable????" + grid[gridX, gridY].isPlaceable);
+                return grid[gridX, gridY];
+            }
+            else
+            {
+                GetRandomFieldNodePoint();
+            }
+            return grid[gridX, gridY];
         }
 
         public FieldNode NodeFromFieldGrid(Vector3 worldPosition)
